@@ -1,3 +1,3 @@
-# Nicolas-L0/learnopengl/03_GLTransform
+# Nicolas-L0/learnopengl/02_GLTexture
 
-This project is following the [[Getting started / Transormations]](https://learnopengl.com/Getting-started/Transformations) part.
+This project is following the [[Getting started / Textures]](https://learnopengl.com/Getting-started/Textures) part.
