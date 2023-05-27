@@ -32,13 +32,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="vshader.vs">
+    <None Include="shader.vert">
       <Filter>源文件</Filter>
     </None>
-    <None Include="fshaderO.fs">
-      <Filter>源文件</Filter>
-    </None>
-    <None Include="fshaderY.fs">
+    <None Include="shader.frag">
       <Filter>源文件</Filter>
     </None>
   </ItemGroup>

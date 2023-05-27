@@ -154,9 +154,8 @@
     <ClCompile Include="texture.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="fshaderO.fs" />
-    <None Include="fshaderY.fs" />
-    <None Include="vshader.vs" />
+    <None Include="shader.frag" />
+    <None Include="shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.hpp" />

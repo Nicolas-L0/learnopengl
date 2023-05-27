@@ -17,9 +17,10 @@ public:
     int width, height, nrChannels;
     unsigned char* data;
 
-    Texture(const char* tex_dir);
+    Texture(const char* tex_dir, int type);
 
-    void use();
+    void use0();
+    void use1();
 };
 
 #endif

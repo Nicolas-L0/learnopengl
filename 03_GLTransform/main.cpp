@@ -121,7 +121,7 @@ int main() {
 
         mat4 trans = mat4(1.0f);
         trans = rotate(trans, timeValue, vec3(0.0, 0.0, 1.0));
-        trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+        trans = translate(trans, vec3(0.5f, -0.5f, 0.0f));
         trans = scale(trans, vec3(0.5, 0.5, 0.5));
 
         tex_container.use();
