@@ -1,6 +1,6 @@
 #include "shader.hpp"
 #include "texture.hpp"
-
+#include "camera.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -11,7 +11,15 @@ using namespace std;
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-const float pi = 3.14;
+//const float pi = 3.14;
+
+float deltaTime = 0.0f; 
+float lastFrame = 0.0f; 
+
+float lastX = SCR_WIDTH / 2, lastY = SCR_HEIGHT / 2;  // mouse position
+bool firstMouse = true;
+
+Camera camera(vec3(0.0f, 0.0f, 3.0f));
 
 float vertices[] = {
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f,  0.0f,
@@ -78,9 +86,59 @@ void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.moveCamera(deltaTime, FORWARD);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.moveCamera(deltaTime, BACKWARD);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.moveCamera(deltaTime, LEFT);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.moveCamera(deltaTime, RIGHT);
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        camera.moveCamera(deltaTime, UPWARD);
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        camera.moveCamera(deltaTime, DOWN);
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)                       // Press key F to enable/disable the FPS camera mode
+        camera.setFPScamera();
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)                       // Press key P to enable/disable the constrainPitch
+        camera.setconstrainPitch();
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)                       // Press key M to disable the mouse
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+    if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)                       // Press key N to enable the mouse
+    {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
+        firstMouse = true;
+    }
+
+}
+
+void mouse_callback(GLFWwindow* window, double input_xpos, double input_ypos) {
+
+    float xpos = static_cast<float>(input_xpos);
+    float ypos = static_cast<float>(input_ypos);
+    if (firstMouse)
+    {
+        lastX = (xpos);
+        lastY = (ypos);
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = (xpos);
+    lastY = (ypos);
+    camera.rotateCamera(xoffset, yoffset);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.zoomCamera(static_cast<float>(yoffset));
 }
 
 int main() {
+
+    // glfw
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -101,6 +159,7 @@ int main() {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
+
 
     // Gl features
     glEnable(GL_DEPTH_TEST);
@@ -144,6 +203,8 @@ int main() {
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
+        glfwSetCursorPosCallback(window, mouse_callback);
+        glfwSetScrollCallback(window, scroll_callback);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -162,8 +223,10 @@ int main() {
         mat4 view = mat4(1.0f);
         mat4 projection = mat4(1.0f);
 
-        view = translate(view, vec3(0.0f, 0.0f, -3.0f));
-        projection = perspective(radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 100.0f);
+        //view = translate(view, vec3(0.0f, 0.0f, -3.0f));
+        //view = lookAt(vec3(sin(glfwGetTime()) * 10.0f, 0.0f, cos(glfwGetTime()) * 10.0f), cameraTarget, cameraUp);    camera rotating
+        view = camera.getViewMatrix();
+        projection = perspective(radians(camera.Fov), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 100.0f);
 
         box_shader.setMat4("view", &view);
         box_shader.setMat4("projection", &projection);
@@ -174,7 +237,7 @@ int main() {
             float angle = 20.0f * i + 20.0f;
             model = translate(model, cubePositions[i]);
             model = rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            model = translate(model, vec3(0.1f * i, 0.0f, 0.0f)); //Testing the impact of different orderings of rotate & translate
+            model = translate(model, vec3(0.1f * i, 0.0f, 0.0f)); //For testing the impact of different orderings of rotate & translate
             box_shader.setMat4("model", &model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -185,11 +248,15 @@ int main() {
         glfwSwapBuffers(window);
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        float currentFrame = static_cast<float> (glfwGetTime());
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+        //cout << deltaTime << endl;
     }
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    //glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;
