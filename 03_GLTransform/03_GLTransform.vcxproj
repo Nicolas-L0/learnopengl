@@ -79,8 +79,8 @@
     <LibraryPath>C:\Users\NicEu\Downloads\Documents\learnopengl\external\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\NicEu\Downloads\Documents\learnopengl\external\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\NicEu\Downloads\Documents\learnopengl\external\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\external\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\external\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\Users\NicEu\Downloads\Documents\learnopengl\external\include;$(IncludePath)</IncludePath>
