@@ -1,3 +1,0 @@
-[submodule "external/include/imgui"]
-	path = external/include/imgui
-	url = https://github.com/reforia/imgui
