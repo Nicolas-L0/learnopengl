@@ -8,6 +8,7 @@ Camera::Camera(vec3 position, vec3 up, float yaw, float pitch):
     WorldUp = up;
     Yaw = yaw;
     Pitch = pitch;
+    updateCamera();
 }
 
 mat4 Camera::getViewMatrix() {

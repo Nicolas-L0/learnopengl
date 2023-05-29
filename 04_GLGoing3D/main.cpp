@@ -6,6 +6,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <imgui/imgui.h>
+
 using namespace glm;
 using namespace std;
 
@@ -16,8 +18,9 @@ const unsigned int SCR_HEIGHT = 600;
 float deltaTime = 0.0f; 
 float lastFrame = 0.0f; 
 
-float lastX = SCR_WIDTH / 2, lastY = SCR_HEIGHT / 2;  // mouse position
+bool enable_mouse_camera = false;
 bool firstMouse = true;
+float lastX = SCR_WIDTH / 2, lastY = SCR_HEIGHT / 2;  // mouse position
 
 Camera camera(vec3(0.0f, 0.0f, 3.0f));
 
@@ -103,12 +106,16 @@ void processInput(GLFWwindow* window)
         camera.setFPScamera();
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)                       // Press key P to enable/disable the constrainPitch
         camera.setconstrainPitch();
-    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)                       // Press key M to disable the mouse
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
-    if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)                       // Press key N to enable the mouse
+    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)                       // Press key M to enable the mouse_camera
+    {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        enable_mouse_camera = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)                       // Press key N to disable the mouse_camera
     {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
         firstMouse = true;
+        enable_mouse_camera = false;
     }
 
 }
@@ -119,16 +126,19 @@ void mouse_callback(GLFWwindow* window, double input_xpos, double input_ypos) {
     float ypos = static_cast<float>(input_ypos);
     if (firstMouse)
     {
-        lastX = (xpos);
-        lastY = (ypos);
+        lastX = xpos;
+        lastY = ypos;
         firstMouse = false;
     }
 
     float xoffset = xpos - lastX;
     float yoffset = lastY - ypos;
-    lastX = (xpos);
-    lastY = (ypos);
-    camera.rotateCamera(xoffset, yoffset);
+    lastX = xpos;
+    lastY = ypos;
+    if (enable_mouse_camera) 
+    { 
+        camera.rotateCamera(xoffset, yoffset); 
+    }
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
