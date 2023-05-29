@@ -5,6 +5,7 @@ Camera::Camera(vec3 position, vec3 up, float yaw, float pitch):
 {
 
     Position = position;
+    defaultPosition = position;
     WorldUp = up;
     Yaw = yaw;
     Pitch = pitch;
@@ -80,5 +81,18 @@ void Camera::setFPScamera() {
 
 void Camera::setconstrainPitch() {
     constrainPitch ? constrainPitch = false : constrainPitch = true;
+}
+
+void Camera::resetcamera() {
+    isFPScamera = false;
+    constrainPitch = true;
+    Pitch = PITCH; Yaw = YAW; Fov = FOV;
+
+    Front = vec3(0.0f, 0.0f, -1.0f);
+    Right = normalize(cross(Front, WorldUp));
+    Up = normalize(cross(Right, Front));
+    Position = defaultPosition;
+
+    updateCamera();
 }
 

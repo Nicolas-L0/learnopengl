@@ -6,7 +6,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <imgui/imgui.h>
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 using namespace glm;
 using namespace std;
@@ -18,11 +20,15 @@ const unsigned int SCR_HEIGHT = 600;
 float deltaTime = 0.0f; 
 float lastFrame = 0.0f; 
 
+bool is_F_Pressed = false;
+bool is_P_Pressed = false;
 bool enable_mouse_camera = false;
 bool firstMouse = true;
 float lastX = SCR_WIDTH / 2, lastY = SCR_HEIGHT / 2;  // mouse position
 
 Camera camera(vec3(0.0f, 0.0f, 3.0f));
+
+vec4 clear_color(0.2f, 0.3f, 0.3f, 0.0f);
 
 float vertices[] = {
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f,  0.0f,
@@ -102,10 +108,20 @@ void processInput(GLFWwindow* window)
         camera.moveCamera(deltaTime, UPWARD);
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
         camera.moveCamera(deltaTime, DOWN);
-    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)                       // Press key F to enable/disable the FPS camera mode
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !is_F_Pressed)      // Press key F to enable/disable the FPS camera mode
+    {
         camera.setFPScamera();
-    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)                       // Press key P to enable/disable the constrainPitch
+        is_F_Pressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE)
+        is_F_Pressed = false;
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS && !is_P_Pressed)      // Press key P to enable/disable the constrainPitch
+    {
         camera.setconstrainPitch();
+        is_P_Pressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE)
+        is_P_Pressed = false;
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)                       // Press key M to enable the mouse_camera
     {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -151,8 +167,10 @@ int main() {
     // glfw
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+    //glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
 
     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
@@ -170,6 +188,22 @@ int main() {
         return -1;
     }
 
+
+    // imGui
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    ImGui::StyleColorsDark(); // Alternative: ImGui::StyleColorsLight();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 460");
+
+
+
+    //ImGui::Text("Hello, world %d", 123);
+    //if (ImGui::Button("Save"))
+    //    ;
+    //ImGui::InputText("string", buf, IM_ARRAYSIZE(buf));
+    //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
 
     // Gl features
     glEnable(GL_DEPTH_TEST);
@@ -202,6 +236,7 @@ int main() {
     // Texture
     Texture tex_container("../assets/texture/container.jpg", 0);
     Texture tex_avatar("../assets/texture/avatar.png", 1);
+    float mixvalue = 0.5;
 
     // Shaders
     Shader box_shader("shader.vert", "shader.frag");
@@ -216,8 +251,40 @@ int main() {
         glfwSetCursorPosCallback(window, mouse_callback);
         glfwSetScrollCallback(window, scroll_callback);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        {
+            ImGui::Begin("config");                          // Create a window called "Hello, world!" and append into it.
+
+            ImGui::Text("This is my first OpenGL project!");               // Display some text (you can use a format strings too)
+            ImGui::Checkbox("enable_mouse_camera (key_M/N)", &enable_mouse_camera);      // Edit bools storing our window open/close state
+            ImGui::Checkbox("firstMouse", &firstMouse);
+            ImGui::Checkbox("camera.isFPScamera (Key_F)", &camera.isFPScamera);
+            ImGui::Checkbox("camera.constrainPitch (Key_P)", &camera.constrainPitch);
+            ImGui::SliderFloat("mixvalue", &mixvalue, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::ColorEdit4("clear color", (float*)&clear_color); // Edit 4 floats representing a color
+
+            if (ImGui::Button("reset"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            {
+                enable_mouse_camera = false;
+                firstMouse = true;
+                mixvalue = 0.5;
+                clear_color = vec4(0.2f, 0.3f, 0.3f, 0.0f);
+                camera.resetcamera();
+            }
+            //ImGui::SameLine();
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            ImGui::End();
+        }
+        ImGui::Render();
+
+        glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
         glClear(GL_COLOR_BUFFER_BIT);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -240,6 +307,7 @@ int main() {
 
         box_shader.setMat4("view", &view);
         box_shader.setMat4("projection", &projection);
+        box_shader.setFloat("mixvalue", mixvalue);
 
         for (unsigned int i = 0; i<10; i++)
         {
@@ -254,6 +322,7 @@ int main() {
         }
 
         glBindVertexArray(0);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -262,11 +331,14 @@ int main() {
         float currentFrame = static_cast<float> (glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-        //cout << deltaTime << endl;
     }
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;

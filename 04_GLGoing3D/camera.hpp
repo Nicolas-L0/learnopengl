@@ -30,6 +30,9 @@ public:
     glm::vec3 Up        =   vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 Right     =   normalize(cross(Front, Up));
     glm::vec3 WorldUp   =   vec3(0.0f, 0.0f, 0.0f);
+
+    glm::vec3 defaultPosition = vec3(0.0f, 0.0f, 0.0f);
+
     //vec3 cameraDirection = normalize(cameraPos - cameraTarget);       == - cameraFront
     //vec3 cameraRight = normalize(cross(cameraUp, cameraDirection));
     //mat4 view = lookAt(cameraPos, cameraTarget, cameraUp);
@@ -53,6 +56,7 @@ public:
     void zoomCamera(float yoffset);
     void setFPScamera();
     void setconstrainPitch();
+    void resetcamera();
 };
 
 #endif
