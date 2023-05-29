@@ -79,7 +79,7 @@
     <LibraryPath>C:\Users\NicEu\Downloads\Documents\learnopengl\external\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>..\external\include;$(IncludePath)</IncludePath>
+    <IncludePath>..\external\include\imgui;..\external\include;$(IncludePath)</IncludePath>
     <LibraryPath>..\external\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -147,13 +147,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\external\include\imgui\imgui.cpp" />
+    <ClCompile Include="..\external\include\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\external\include\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\external\include\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\external\include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\external\src\glad.c" />
     <ClCompile Include="camera.cpp" />
-    <ClCompile Include="imgui\imgui.cpp" />
-    <ClCompile Include="imgui\imgui_draw.cpp" />
-    <ClCompile Include="imgui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="stb_image.cpp" />
@@ -165,14 +165,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.hpp" />
-    <ClInclude Include="imgui\imconfig.h" />
-    <ClInclude Include="imgui\imgui.h" />
-    <ClInclude Include="imgui\imgui_impl_glfw.h" />
-    <ClInclude Include="imgui\imgui_impl_opengl3.h" />
-    <ClInclude Include="imgui\imgui_internal.h" />
-    <ClInclude Include="imgui\imstb_rectpack.h" />
-    <ClInclude Include="imgui\imstb_textedit.h" />
-    <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="texture.hpp" />
   </ItemGroup>
