@@ -162,6 +162,8 @@
   <ItemGroup>
     <None Include="box_shader.frag" />
     <None Include="box_shader.vert" />
+    <None Include="cube_shader.frag" />
+    <None Include="cube_shader.vert" />
     <None Include="light_shader.frag" />
     <None Include="light_shader.vert" />
   </ItemGroup>

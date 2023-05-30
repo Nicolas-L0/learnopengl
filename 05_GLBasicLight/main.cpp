@@ -26,59 +26,62 @@ bool enable_mouse_camera = false;
 bool firstMouse = true;
 float lastX = SCR_WIDTH / 2, lastY = SCR_HEIGHT / 2;  // mouse position
 
-Camera camera(vec3(0.0f, 0.0f, 3.0f));
+vec3 cameraPos = vec3(0.0f, 0.0f, 3.0f);
+Camera camera(cameraPos);
 
 vec4 clear_color(0.1f, 0.1f, 0.1f, 1.0f);
 
 // lighting!
 vec3 lightPos(1.2f, 1.0f, 2.0f);
 vec3 lightColor(1.0f, 1.0f, 1.0f);
+int shininess = 5;
 
-
+// cube
+vec3 CubePos(2.0f, 0.5f, 0.5f);
 
 float vertices[] = {
-    // Position             // TexCod       //Color
-    -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,    1.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-                                                         
-    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,    0.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-                                                         
-    -0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-                                                         
-     0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-                                                         
-    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,    1.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-                                                         
-    -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-     0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     0.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-     0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,    0.0f, 0.0f,     0.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     0.0f,  0.0f,  0.0f
+    // Position             // TexCod       // Color                // Normal
+    -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, -1.0f,
+     0.5f, -0.5f, -0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, -1.0f,
+     0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, -1.0f,
+     0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, -1.0f,
+    -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, -1.0f,
+    -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, -1.0f,
+
+    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, 1.0f,
+
+    -0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
+
+     0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
+
+    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,   -0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,   -0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,   -0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,   -0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,   -0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,   -0.0f, -1.0f,  0.0f,
+
+    -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  1.0f,  0.0f
 };
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -195,21 +198,38 @@ int main() {
     glEnable(GL_DEPTH_TEST);
     
     /* Vertex Input */
-    // Cube
-    unsigned int cubeVAO;
-    glGenVertexArrays(1, &cubeVAO);
-    glBindVertexArray(cubeVAO);
     unsigned int cubeVBO;
     glGenBuffers(1, &cubeVBO);
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    
+    // Cube
+    unsigned int cubeVAO;
+    glGenVertexArrays(1, &cubeVAO);
+    glBindVertexArray(cubeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(5 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
     glEnableVertexAttribArray(2);
+
+    // Box
+    unsigned int boxVAO;
+    glGenVertexArrays(1, &boxVAO);
+    glBindVertexArray(boxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
+    glEnableVertexAttribArray(3);
 
     // light Source
     unsigned int lightVAO;
@@ -217,7 +237,7 @@ int main() {
     glBindVertexArray(lightVAO);
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -226,9 +246,10 @@ int main() {
     // Texture
     Texture tex_container("../assets/texture/container.jpg", 0);
     Texture tex_avatar("../assets/texture/avatar.png", 1);
-    float mixvalue = 0.5;
+    float mixvalue = 0.2;
 
     // Shaders
+    Shader cube_shader("cube_shader.vert", "cube_shader.frag");
     Shader box_shader("box_shader.vert", "box_shader.frag");
     Shader light_shader("light_shader.vert", "light_shader.frag");
 
@@ -248,18 +269,19 @@ int main() {
         ImGui::NewFrame();
 
         {
-            ImGui::Begin("config");                                                     // Create a window called "Hello, world!" and append into it.
+            ImGui::Begin("config");                                                        // Create a window called "Hello, world!" and append into it.
 
-            ImGui::Text("This is my first OpenGL project!");                            // Display some text (you can use a format strings too)
+            ImGui::Text("This is my first OpenGL project!");                                // Display some text (you can use a format strings too)
             ImGui::Checkbox("enable_mouse_camera (key_M/N)", &enable_mouse_camera);     // Edit bools storing our window open/close state
             ImGui::Checkbox("firstMouse", &firstMouse);
             ImGui::Checkbox("camera.isFPScamera (Key_F)", &camera.isFPScamera);
             ImGui::Checkbox("camera.constrainPitch (Key_P)", &camera.constrainPitch);
-            ImGui::SliderFloat("mixvalue", &mixvalue, 0.0f, 1.0f);                      // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit4("clear color", (float*)&clear_color);                     // Edit 4 floats representing a color
-            ImGui::ColorEdit4("light cube color", (float*)&lightColor);                     // 
+            ImGui::SliderFloat("mixvalue", &mixvalue, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderInt("shininess", &shininess, 1, 10);
+            ImGui::ColorEdit4("clear color", (float*)&clear_color);                       // Edit 4 floats representing a color
+            ImGui::ColorEdit4("light cube color", (float*)&lightColor);                 
 
-            if (ImGui::Button("reset"))                                                 // Buttons return true when clicked (most widgets return true when edited/activated)
+            if (ImGui::Button("reset"))                                                   // Buttons return true when clicked (most widgets return true when edited/activated)
             {
                 enable_mouse_camera = false;
                 firstMouse = true;
@@ -280,29 +302,53 @@ int main() {
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        tex_container.use0();
-        tex_avatar.use1();
 
         // mvp
         mat4 model = mat4(1.0f);
         mat4 view = mat4(1.0f);
         mat4 projection = mat4(1.0f);
+        mat3 normalMatrix = mat3(1.0f);
         view = camera.getViewMatrix();
         projection = perspective(radians(camera.Fov), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 100.0f);
+        
+        /* draw cube */
+        glBindVertexArray(cubeVAO);
+        cube_shader.use();
+
+        model = translate(model, CubePos);
+        model = rotate(model, (float)(glfwGetTime() * radians(5.0)), glm::vec3(0.5f, 0.3f, 0.5f));
+        normalMatrix = mat3(transpose(inverse(model)));
+        cube_shader.setMat3("normalMatrix", &normalMatrix);
+        cube_shader.setMat4("model", &model);
+        cube_shader.setMat4("view", &view);
+        cube_shader.setMat4("projection", &projection);
+        cube_shader.setVec3("lightPos", &lightPos);
+        cube_shader.setVec3("lightColor", &lightColor);
+        cube_shader.setVec3("viewPos", &cameraPos);
+        cube_shader.setInt("shininess", shininess);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         /* draw box */
-        glBindVertexArray(cubeVAO);
+        glBindVertexArray(boxVAO);
         box_shader.use();
+        tex_container.use0();
+        tex_avatar.use1();
 
-        box_shader.setFloat("mixvalue", mixvalue);
+        model = mat4(1.0f);
         model = rotate(model, (float)(glfwGetTime() * radians(15.0)), glm::vec3(1.0f, 0.3f, 0.5f));
+        normalMatrix = mat3(transpose(inverse(model)));
+        box_shader.setMat3("normalMatrix", &normalMatrix);
         box_shader.setMat4("model", &model);
         box_shader.setMat4("view", &view);
         box_shader.setMat4("projection", &projection);
+        box_shader.setVec3("lightPos", &lightPos);
         box_shader.setVec3("lightColor", &lightColor);
+        box_shader.setVec3("viewPos", &cameraPos);
+        box_shader.setFloat("mixvalue", mixvalue);
+        box_shader.setInt("shininess", shininess);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        /* draw light cube */
+        /* draw light sourse: light cube */
         glBindVertexArray(lightVAO);
         light_shader.use();
 
@@ -328,6 +374,7 @@ int main() {
     }
 
     glDeleteVertexArrays(1, &cubeVAO);
+    glDeleteVertexArrays(1, &boxVAO);
     glDeleteVertexArrays(1, &lightVAO);
     glDeleteBuffers(1, &cubeVBO);
 

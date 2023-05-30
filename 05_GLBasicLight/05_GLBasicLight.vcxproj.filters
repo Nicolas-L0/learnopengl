@@ -68,6 +68,12 @@
     <None Include="light_shader.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="cube_shader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="cube_shader.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.hpp">

@@ -1,16 +1,11 @@
 #version 460 core
 
 in vec3 outColor;
-in vec2 texCoord;
 in vec3 Normal;
 in vec3 FragPos;
 
 out vec4 FragColor;
 
-uniform sampler2D containerTexture;
-uniform sampler2D avatarTexture;
-
-uniform float mixvalue;
 uniform vec3 lightColor;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
@@ -19,7 +14,7 @@ uniform int shininess;
 void main()
 {
 	// TexColor
-	vec4 texColor = mix(texture(containerTexture, texCoord), texture(avatarTexture, texCoord), mixvalue);
+	vec4 texColor = vec4(outColor, 1.0);
 
 	// Ambient lighting
 	float ambientStrength = 0.1;
