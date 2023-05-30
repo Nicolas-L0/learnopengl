@@ -16,6 +16,9 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{7f26d61c-5146-4af2-aa91-f518b0465fa1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{cde028ed-921f-4118-8e21-c9cb1d561bb4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\external\include\imgui\imgui.cpp">
@@ -54,30 +57,27 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="box_shader.frag">
-      <Filter>源文件</Filter>
+      <Filter>shaders</Filter>
     </None>
     <None Include="box_shader.vert">
-      <Filter>源文件</Filter>
+      <Filter>shaders</Filter>
     </None>
     <None Include="light_shader.frag">
-      <Filter>源文件</Filter>
+      <Filter>shaders</Filter>
     </None>
     <None Include="light_shader.vert">
-      <Filter>源文件</Filter>
-    </None>
-    <None Include="README.md">
-      <Filter>源文件</Filter>
+      <Filter>shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.hpp">
-      <Filter>源文件</Filter>
+      <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="shader.hpp">
-      <Filter>源文件</Filter>
+      <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="texture.hpp">
-      <Filter>源文件</Filter>
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

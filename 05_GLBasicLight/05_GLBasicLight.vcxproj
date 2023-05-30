@@ -164,7 +164,6 @@
     <None Include="box_shader.vert" />
     <None Include="light_shader.frag" />
     <None Include="light_shader.vert" />
-    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.hpp" />
