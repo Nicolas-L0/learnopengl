@@ -32,12 +32,43 @@ Camera camera(cameraPos);
 vec4 clear_color(0.1f, 0.1f, 0.1f, 1.0f);
 
 // lighting!
-vec3 lightPos(1.2f, 1.0f, 2.0f);
-vec3 lightColor(1.0f, 1.0f, 1.0f);
-int shininess = 5;
 
-// cube
-vec3 CubePos(2.0f, 0.5f, 0.5f);
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    int shininess;
+};
+
+struct Light {
+    vec3 position;
+    vec3 color;
+    float a;
+    vec3 ambient;
+    float d;
+    vec3 diffuse;
+    float s;
+    vec3 specular;
+
+    Light(vec3 pos, vec3 color, float a, float d, float s) {
+        position = pos;
+
+        this->color = color;
+        this->a = a;
+        this->d = d;
+        this->s = s;
+        
+        updateLight();
+    }
+
+    void updateLight() {
+        ambient = a * color;
+        diffuse = d * color;
+        specular = s * color;
+    }
+};
+
+
 
 float vertices[] = {
     // Position             // TexCod       // Color                // Normal
@@ -46,21 +77,21 @@ float vertices[] = {
      0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, -1.0f,
      0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, -1.0f,
     -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, -1.0f,
-    -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, -1.0f,
+    -0.5f, -0.5f, -0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, -1.0f, 
 
-    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f,  1.0f,
+     0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f,  1.0f,
+     0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f,  1.0f,
+     0.5f,  0.5f,  0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f,  1.0f,
+    -0.5f,  0.5f,  0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f,  0.0f,  1.0f,
 
-    -0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
-    -0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,   -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,   -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,   -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,   -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,   -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,   -1.0f,  0.0f,  0.0f,
 
      0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
      0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
@@ -69,12 +100,12 @@ float vertices[] = {
      0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
      0.5f,  0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    1.0f,  0.0f,  0.0f,
 
-    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,   -0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,   -0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,   -0.0f, -1.0f,  0.0f,
-     0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,   -0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,   -0.0f, -1.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,   -0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,    1.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f,     1.0f,  0.5f,  0.31f,    0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f, -1.0f,  0.0f,
 
     -0.5f,  0.5f, -0.5f,    0.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  1.0f,  0.0f,
      0.5f,  0.5f, -0.5f,    1.0f, 1.0f,     1.0f,  0.5f,  0.31f,    0.0f,  1.0f,  0.0f,
@@ -185,6 +216,18 @@ int main() {
         return -1;
     }
 
+    // light
+    Light cubeLight(vec3(1.2f, 2.0f, 1.5f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f);
+
+    Material cubeMaterial = {
+        vec3(1.0f, 0.5f, 0.31f),
+        vec3(1.0f, 0.5f, 0.31f),
+        vec3(0.5f, 0.5f, 0.5f),
+        32
+    };
+
+    // boxPosOffset
+    vec3 boxPosOffset(2.0f, 0.5f, 0.5f);
 
     // imGui
     ImGui::CreateContext();
@@ -277,9 +320,9 @@ int main() {
             ImGui::Checkbox("camera.isFPScamera (Key_F)", &camera.isFPScamera);
             ImGui::Checkbox("camera.constrainPitch (Key_P)", &camera.constrainPitch);
             ImGui::SliderFloat("mixvalue", &mixvalue, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::SliderInt("shininess", &shininess, 1, 10);
+            ImGui::SliderInt("shininess", &cubeMaterial.shininess, 0, 256);
             ImGui::ColorEdit4("clear color", (float*)&clear_color);                       // Edit 4 floats representing a color
-            ImGui::ColorEdit4("light cube color", (float*)&lightColor);                 
+            ImGui::ColorEdit3("light cube color", (float*)&cubeLight.color);                 
 
             if (ImGui::Button("reset"))                                                   // Buttons return true when clicked (most widgets return true when edited/activated)
             {
@@ -294,6 +337,8 @@ int main() {
             ImGui::End();
         }
         ImGui::Render();
+
+        cubeLight.updateLight();
 
         glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -315,17 +360,22 @@ int main() {
         glBindVertexArray(cubeVAO);
         cube_shader.use();
 
-        model = translate(model, CubePos);
-        model = rotate(model, (float)(glfwGetTime() * radians(5.0)), glm::vec3(0.5f, 0.3f, 0.5f));
+        model = mat4(1.0f);
+        //model = rotate(model, (float)(glfwGetTime() * radians(5.0)), glm::vec3(0.5f, 0.3f, 0.5f));
         normalMatrix = mat3(transpose(inverse(model)));
         cube_shader.setMat3("normalMatrix", &normalMatrix);
         cube_shader.setMat4("model", &model);
         cube_shader.setMat4("view", &view);
         cube_shader.setMat4("projection", &projection);
-        cube_shader.setVec3("lightPos", &lightPos);
-        cube_shader.setVec3("lightColor", &lightColor);
-        cube_shader.setVec3("viewPos", &cameraPos);
-        cube_shader.setInt("shininess", shininess);
+        cube_shader.setVec3("viewPos", &camera.Position);
+        cube_shader.setVec3("light.position", &cubeLight.position);
+        cube_shader.setVec3("light.ambient", &cubeLight.ambient);
+        cube_shader.setVec3("light.diffuse", &cubeLight.diffuse);
+        cube_shader.setVec3("light.specular", &cubeLight.specular);
+        cube_shader.setVec3("material.ambient", &cubeMaterial.ambient);
+        cube_shader.setVec3("material.diffuse", &cubeMaterial.diffuse);
+        cube_shader.setVec3("material.specular", &cubeMaterial.specular);
+        cube_shader.setInt("material.shininess", cubeMaterial.shininess);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         /* draw box */
@@ -335,17 +385,23 @@ int main() {
         tex_avatar.use1();
 
         model = mat4(1.0f);
-        model = rotate(model, (float)(glfwGetTime() * radians(15.0)), glm::vec3(1.0f, 0.3f, 0.5f));
+        model = translate(model, boxPosOffset);
+        //model = rotate(model, (float)(glfwGetTime() * radians(15.0)), glm::vec3(1.0f, 0.3f, 0.5f));
         normalMatrix = mat3(transpose(inverse(model)));
         box_shader.setMat3("normalMatrix", &normalMatrix);
         box_shader.setMat4("model", &model);
         box_shader.setMat4("view", &view);
         box_shader.setMat4("projection", &projection);
-        box_shader.setVec3("lightPos", &lightPos);
-        box_shader.setVec3("lightColor", &lightColor);
-        box_shader.setVec3("viewPos", &cameraPos);
+        box_shader.setVec3("viewPos", &camera.Position);
         box_shader.setFloat("mixvalue", mixvalue);
-        box_shader.setInt("shininess", shininess);
+        box_shader.setVec3("light.position", &cubeLight.position);
+        box_shader.setVec3("light.ambient", &cubeLight.ambient);
+        box_shader.setVec3("light.diffuse", &cubeLight.diffuse);
+        box_shader.setVec3("light.specular", &cubeLight.specular);
+        box_shader.setVec3("material.ambient", &cubeMaterial.ambient);
+        box_shader.setVec3("material.diffuse", &cubeMaterial.diffuse);
+        box_shader.setVec3("material.specular", &cubeMaterial.specular);
+        box_shader.setInt("material.shininess", cubeMaterial.shininess);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         /* draw light sourse: light cube */
@@ -353,12 +409,12 @@ int main() {
         light_shader.use();
 
         model = mat4(1.0f);
-        model = translate(model, lightPos);
+        model = translate(model, cubeLight.position);
         model = scale(model, vec3(0.2f));
         light_shader.setMat4("model", &model);
         light_shader.setMat4("view", &view);
         light_shader.setMat4("projection", &projection);
-        light_shader.setVec3("lightColor", &lightColor);
+        light_shader.setVec3("lightColor", &cubeLight.color);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glBindVertexArray(0);
