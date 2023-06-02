@@ -37,7 +37,7 @@ struct Material {
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
-    int shininess;
+    float shininess;
 };
 
 struct Light {
@@ -220,14 +220,31 @@ int main() {
     Light cubeLight(vec3(1.2f, 2.0f, 1.5f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f);
 
     Material cubeMaterial = {
-        vec3(1.0f, 0.5f, 0.31f),
-        vec3(1.0f, 0.5f, 0.31f),
-        vec3(0.5f, 0.5f, 0.5f),
-        32
+        vec3(0.135f, 0.2225f, 0.1575f),
+        vec3(0.54f, 0.89f, 0.63f),
+        vec3(0.316228f, 0.316228f, 0.316228f),
+        0.1 * 128
+    };
+
+    Material boxMaterial = {
+        vec3(0.05f, 0.05f, 0.05f),
+        vec3(0.50f, 0.50f, 0.50f),
+        vec3(0.70f, 0.70f, 0.70f),
+        0.25 * 128
     };
 
     // boxPosOffset
-    vec3 boxPosOffset(2.0f, 0.5f, 0.5f);
+    vec3 boxPosOffset[] = {
+        vec3(2.0f,  5.0f, -15.0f),
+        vec3(-1.5f, -2.2f, -2.5f),
+        vec3(-3.8f, -2.0f, -12.3f),
+        vec3(2.4f, -0.4f, -3.5f),
+        vec3(-1.7f,  3.0f, -7.5f),
+        vec3(1.3f, -2.0f, -2.5f),
+        vec3(1.5f,  2.0f, -2.5f),
+        vec3(1.5f,  0.2f, -1.5f),
+        vec3(-1.3f,  1.0f, -1.5f)
+    };
 
     // imGui
     ImGui::CreateContext();
@@ -289,7 +306,7 @@ int main() {
     // Texture
     Texture tex_container("../assets/texture/container.jpg", 0);
     Texture tex_avatar("../assets/texture/avatar.png", 1);
-    float mixvalue = 0.2;
+    float mixvalue = 0.0;
 
     // Shaders
     Shader cube_shader("cube_shader.vert", "cube_shader.frag");
@@ -320,7 +337,7 @@ int main() {
             ImGui::Checkbox("camera.isFPScamera (Key_F)", &camera.isFPScamera);
             ImGui::Checkbox("camera.constrainPitch (Key_P)", &camera.constrainPitch);
             ImGui::SliderFloat("mixvalue", &mixvalue, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::SliderInt("shininess", &cubeMaterial.shininess, 0, 256);
+            ImGui::SliderFloat("shininess", &cubeMaterial.shininess, 0.001f, 256.000f);
             ImGui::ColorEdit4("clear color", (float*)&clear_color);                       // Edit 4 floats representing a color
             ImGui::ColorEdit3("light cube color", (float*)&cubeLight.color);                 
 
@@ -361,7 +378,7 @@ int main() {
         cube_shader.use();
 
         model = mat4(1.0f);
-        //model = rotate(model, (float)(glfwGetTime() * radians(5.0)), glm::vec3(0.5f, 0.3f, 0.5f));
+        model = rotate(model, (float)(glfwGetTime() * radians(5.0)), vec3(0.5f, 0.3f, 0.5f));
         normalMatrix = mat3(transpose(inverse(model)));
         cube_shader.setMat3("normalMatrix", &normalMatrix);
         cube_shader.setMat4("model", &model);
@@ -375,7 +392,7 @@ int main() {
         cube_shader.setVec3("material.ambient", &cubeMaterial.ambient);
         cube_shader.setVec3("material.diffuse", &cubeMaterial.diffuse);
         cube_shader.setVec3("material.specular", &cubeMaterial.specular);
-        cube_shader.setInt("material.shininess", cubeMaterial.shininess);
+        cube_shader.setFloat("material.shininess", cubeMaterial.shininess);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         /* draw box */
@@ -384,25 +401,30 @@ int main() {
         tex_container.use0();
         tex_avatar.use1();
 
-        model = mat4(1.0f);
-        model = translate(model, boxPosOffset);
-        //model = rotate(model, (float)(glfwGetTime() * radians(15.0)), glm::vec3(1.0f, 0.3f, 0.5f));
-        normalMatrix = mat3(transpose(inverse(model)));
-        box_shader.setMat3("normalMatrix", &normalMatrix);
-        box_shader.setMat4("model", &model);
-        box_shader.setMat4("view", &view);
-        box_shader.setMat4("projection", &projection);
-        box_shader.setVec3("viewPos", &camera.Position);
-        box_shader.setFloat("mixvalue", mixvalue);
-        box_shader.setVec3("light.position", &cubeLight.position);
-        box_shader.setVec3("light.ambient", &cubeLight.ambient);
-        box_shader.setVec3("light.diffuse", &cubeLight.diffuse);
-        box_shader.setVec3("light.specular", &cubeLight.specular);
-        box_shader.setVec3("material.ambient", &cubeMaterial.ambient);
-        box_shader.setVec3("material.diffuse", &cubeMaterial.diffuse);
-        box_shader.setVec3("material.specular", &cubeMaterial.specular);
-        box_shader.setInt("material.shininess", cubeMaterial.shininess);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        for (unsigned i = 0; i < 9; i++)
+        {
+            model = mat4(1.0f);
+            float angle = 5.0f * i + 20.0f;
+            model = translate(model, boxPosOffset[i]);
+            model = rotate(model, (float)(glfwGetTime() * radians(angle)), vec3(1.0f, 0.3f, 0.5f));
+            normalMatrix = mat3(transpose(inverse(model)));
+            box_shader.setMat3("normalMatrix", &normalMatrix);
+            box_shader.setMat4("model", &model);
+            box_shader.setMat4("view", &view);
+            box_shader.setMat4("projection", &projection);
+            box_shader.setVec3("viewPos", &camera.Position);
+            box_shader.setFloat("mixvalue", mixvalue);
+            box_shader.setVec3("light.position", &cubeLight.position);
+            box_shader.setVec3("light.ambient", &cubeLight.ambient);
+            box_shader.setVec3("light.diffuse", &cubeLight.diffuse);
+            box_shader.setVec3("light.specular", &cubeLight.specular);
+            box_shader.setVec3("material.ambient", &boxMaterial.ambient);
+            box_shader.setVec3("material.diffuse", &boxMaterial.diffuse);
+            box_shader.setVec3("material.specular", &boxMaterial.specular);
+            box_shader.setFloat("material.shininess", boxMaterial.shininess);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
 
         /* draw light sourse: light cube */
         glBindVertexArray(lightVAO);
