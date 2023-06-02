@@ -15,6 +15,9 @@ using namespace std;
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+const float MIXVALUE = 0.0;
+const vec4 CLEARCOLOR = vec4(0.1f, 0.1f, 0.1f, 1.0f);
 //const float pi = 3.14;
 
 float deltaTime = 0.0f; 
@@ -306,7 +309,7 @@ int main() {
     // Texture
     Texture tex_container("../assets/texture/container.jpg", 0);
     Texture tex_avatar("../assets/texture/avatar.png", 1);
-    float mixvalue = 0.0;
+    float mixvalue = MIXVALUE;
 
     // Shaders
     Shader cube_shader("cube_shader.vert", "cube_shader.frag");
@@ -329,24 +332,35 @@ int main() {
         ImGui::NewFrame();
 
         {
-            ImGui::Begin("config");                                                        // Create a window called "Hello, world!" and append into it.
+            ImGui::Begin("config");                                                   
 
-            ImGui::Text("This is my first OpenGL project!");                                // Display some text (you can use a format strings too)
-            ImGui::Checkbox("enable_mouse_camera (key_M/N)", &enable_mouse_camera);     // Edit bools storing our window open/close state
+            ImGui::Text("This is my first OpenGL project!");
+            ImGui::Text("Global setting:");
+            ImGui::Checkbox("enable_mouse_camera (key_M/N)", &enable_mouse_camera);   
             ImGui::Checkbox("firstMouse", &firstMouse);
             ImGui::Checkbox("camera.isFPScamera (Key_F)", &camera.isFPScamera);
             ImGui::Checkbox("camera.constrainPitch (Key_P)", &camera.constrainPitch);
-            ImGui::SliderFloat("mixvalue", &mixvalue, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::SliderFloat("shininess", &cubeMaterial.shininess, 0.001f, 256.000f);
-            ImGui::ColorEdit4("clear color", (float*)&clear_color);                       // Edit 4 floats representing a color
-            ImGui::ColorEdit3("light cube color", (float*)&cubeLight.color);                 
+            ImGui::ColorEdit4("clear color", (float*)&clear_color);         
+            ImGui::Text("Box config:");
+            ImGui::SliderFloat("boxTex_mixvalue", &mixvalue, 0.0f, 1.0f);             
+            ImGui::Text("CubeMaterial config:");                                      
+            ImGui::ColorEdit3("ambient", (float*)&cubeMaterial.ambient);
+            ImGui::ColorEdit3("diffuse", (float*)&cubeMaterial.diffuse);
+            ImGui::ColorEdit3("specular", (float*)&cubeMaterial.specular);
+            ImGui::SliderFloat("shininess", &cubeMaterial.shininess, 0.0001f, 256.0000f);
+            ImGui::Text("LightSourse config:");
+            ImGui::ColorEdit3("light color", (float*)&cubeLight.color);
+            ImGui::SliderFloat("ambient", &cubeLight.a, 0.0000f, 1.0000f);
+            ImGui::SliderFloat("diffuse", &cubeLight.d, 0.0000f, 1.0000f);
+            ImGui::SliderFloat("specular", &cubeLight.s, 0.0000f, 1.0000f);
 
-            if (ImGui::Button("reset"))                                                   // Buttons return true when clicked (most widgets return true when edited/activated)
+
+            if (ImGui::Button("reset"))                                               
             {
                 enable_mouse_camera = false;
                 firstMouse = true;
-                mixvalue = 0.5;
-                clear_color = vec4(0.1f, 0.1f, 0.1f, 1.0f);
+                mixvalue = MIXVALUE;
+                clear_color = CLEARCOLOR;
                 camera.resetcamera();
             }
             //ImGui::SameLine();
