@@ -220,7 +220,7 @@ int main() {
     }
 
     // light
-    Light cubeLight(vec3(1.2f, 2.0f, 1.5f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f);
+    Light cubeLight(vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f);
 
     Material cubeMaterial = {
         vec3(0.135f, 0.2225f, 0.1575f),
@@ -378,7 +378,13 @@ int main() {
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+        // movable light position
+        vec3 lightPos(1.0f);
+        lightPos.x = cubeLight.position.x + cos(glfwGetTime() / 2) * 2.0f;
+        lightPos.y = cubeLight.position.y + sin(glfwGetTime() / 2) * 2.0f;
+        lightPos.z = cubeLight.position.z;
 
+        
         // mvp
         mat4 model = mat4(1.0f);
         mat4 view = mat4(1.0f);
@@ -399,7 +405,7 @@ int main() {
         cube_shader.setMat4("view", &view);
         cube_shader.setMat4("projection", &projection);
         cube_shader.setVec3("viewPos", &camera.Position);
-        cube_shader.setVec3("light.position", &cubeLight.position);
+        cube_shader.setVec3("light.position", &lightPos);
         cube_shader.setVec3("light.ambient", &cubeLight.ambient);
         cube_shader.setVec3("light.diffuse", &cubeLight.diffuse);
         cube_shader.setVec3("light.specular", &cubeLight.specular);
@@ -428,7 +434,7 @@ int main() {
             box_shader.setMat4("projection", &projection);
             box_shader.setVec3("viewPos", &camera.Position);
             box_shader.setFloat("mixvalue", mixvalue);
-            box_shader.setVec3("light.position", &cubeLight.position);
+            box_shader.setVec3("light.position", &lightPos);
             box_shader.setVec3("light.ambient", &cubeLight.ambient);
             box_shader.setVec3("light.diffuse", &cubeLight.diffuse);
             box_shader.setVec3("light.specular", &cubeLight.specular);
@@ -445,7 +451,7 @@ int main() {
         light_shader.use();
 
         model = mat4(1.0f);
-        model = translate(model, cubeLight.position);
+        model = translate(model, lightPos);
         model = scale(model, vec3(0.2f));
         light_shader.setMat4("model", &model);
         light_shader.setMat4("view", &view);
