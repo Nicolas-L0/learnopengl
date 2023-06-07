@@ -11,6 +11,11 @@
 
 #include "stb_image.h"
 
+enum texType {
+    JPG,
+    PNG
+};
+
 class Texture
 {
 public:
@@ -18,10 +23,9 @@ public:
     int width, height, nrChannels;
     unsigned char* data;
 
-    Texture(const char* tex_dir, int type);
+    Texture(const char* tex_dir, texType type);
 
-    void use0();
-    void use1();
+    void use(int i);
 };
 
 #endif

@@ -1,6 +1,6 @@
 #include "texture.hpp"
 
-Texture::Texture(const char* tex_dir, int type) {
+Texture::Texture(const char* tex_dir, texType type) {
     //type = 0 jpg
     //type = 1 png
 
@@ -15,12 +15,12 @@ Texture::Texture(const char* tex_dir, int type) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     if (data) {
-        if (type == 0)
+        if (type == JPG)
         {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
         }
-        else if (type == 1)
+        else if (type == PNG)
         {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
@@ -31,13 +31,26 @@ Texture::Texture(const char* tex_dir, int type) {
     }
     stbi_image_free(data);
 }
-
-void Texture::use0(){
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-}
-
-void Texture::use1() {
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture);
+void Texture::use(int i) {
+    switch (i)
+    {
+    case 0:
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        break;
+    case 1:
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        break;
+    case 2:
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        break;
+    case 3:
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        break;
+    default:
+        break;
+    }
 }

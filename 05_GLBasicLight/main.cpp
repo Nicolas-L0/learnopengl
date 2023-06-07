@@ -307,8 +307,10 @@ int main() {
     glBindVertexArray(0);
 
     // Texture
-    Texture tex_container("../assets/texture/container.jpg", 0);
-    Texture tex_avatar("../assets/texture/avatar.png", 1);
+    Texture tex_container("../assets/texture/container2.png", PNG);
+    Texture tex_container_specular("../assets/texture/container2_specular.png", PNG);
+    Texture tex_avatar("../assets/texture/avatar.png", PNG);
+    Texture tex_matrix("../assets/texture/matrix.jpg", JPG);
     float mixvalue = MIXVALUE;
 
     // Shaders
@@ -317,8 +319,10 @@ int main() {
     Shader light_shader("light_shader.vert", "light_shader.frag");
 
     box_shader.use();
-    box_shader.setInt("containerTexture", 0);
-    box_shader.setInt("avatarTexture", 1);
+    box_shader.setInt("material.diffuse", 0);
+    box_shader.setInt("material.specular", 1);
+    box_shader.setInt("avatarTexture", 2);
+    box_shader.setInt("matrixTexture", 3);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -418,8 +422,10 @@ int main() {
         /* draw box */
         glBindVertexArray(boxVAO);
         box_shader.use();
-        tex_container.use0();
-        tex_avatar.use1();
+        tex_container.use(0);
+        tex_container_specular.use(1);
+        tex_avatar.use(2);
+        tex_matrix.use(3);
 
         for (unsigned i = 0; i < 9; i++)
         {
@@ -428,11 +434,13 @@ int main() {
             model = translate(model, boxPosOffset[i]);
             model = rotate(model, (float)(glfwGetTime() * radians(angle)), vec3(1.0f, 0.3f, 0.5f));
             normalMatrix = mat3(transpose(inverse(model)));
+            
             box_shader.setMat3("normalMatrix", &normalMatrix);
             box_shader.setMat4("model", &model);
             box_shader.setMat4("view", &view);
             box_shader.setMat4("projection", &projection);
             box_shader.setVec3("viewPos", &camera.Position);
+            box_shader.setFloat("time", (float)(glfwGetTime()));
             box_shader.setFloat("mixvalue", mixvalue);
             box_shader.setVec3("light.position", &lightPos);
             box_shader.setVec3("light.ambient", &cubeLight.ambient);
