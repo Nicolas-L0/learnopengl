@@ -1,6 +1,7 @@
 #include "shader.hpp"
 #include "texture.hpp"
 #include "camera.hpp"
+#include "light.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -32,9 +33,9 @@ float lastX = SCR_WIDTH / 2, lastY = SCR_HEIGHT / 2;  // mouse position
 vec3 cameraPos = vec3(0.0f, 0.0f, 3.0f);
 Camera camera(cameraPos);
 
-vec4 clear_color(0.1f, 0.1f, 0.1f, 1.0f);
+vec4 clear_color = CLEARCOLOR;
 
-// lighting!
+/* lighting! */
 
 struct Material {
     vec3 ambient;
@@ -42,36 +43,6 @@ struct Material {
     vec3 specular;
     float shininess;
 };
-
-struct Light {
-    vec3 position;
-    vec3 color;
-    float a;
-    vec3 ambient;
-    float d;
-    vec3 diffuse;
-    float s;
-    vec3 specular;
-
-    Light(vec3 pos, vec3 color, float a, float d, float s) {
-        position = pos;
-
-        this->color = color;
-        this->a = a;
-        this->d = d;
-        this->s = s;
-        
-        updateLight();
-    }
-
-    void updateLight() {
-        ambient = a * color;
-        diffuse = d * color;
-        specular = s * color;
-    }
-};
-
-
 
 float vertices[] = {
     // Position             // TexCod       // Color                // Normal
@@ -220,7 +191,10 @@ int main() {
     }
 
     // light
-    Light cubeLight(vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f);
+    DirLight dirLight(vec3(-0.2f, -1.0f, -0.3f), vec3(0.945f, 0.549f, 0.153f), 0.1f, 0.3f, 0.8f);
+    PointLight pointLight(vec3(0.0f, 0.0f, 1.0f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f, 1.0f, 0.22f, 0.20f);
+    float cutOff = 12.5, outercutOff = 17.5;
+    SpotLight spotLight(camera.Position, camera.Front, vec3(0.9f, 0.9f, 1.0f), cos(radians(cutOff)), cos(radians(outercutOff)), 0.2f, 0.5f, 1.0f, 1.0f, 0.045f, 0.0075f);
 
     Material cubeMaterial = {
         vec3(0.135f, 0.2225f, 0.1575f),
@@ -352,11 +326,13 @@ int main() {
             ImGui::ColorEdit3("diffuse", (float*)&cubeMaterial.diffuse);
             ImGui::ColorEdit3("specular", (float*)&cubeMaterial.specular);
             ImGui::SliderFloat("shininess", &cubeMaterial.shininess, 0.0001f, 256.0000f);
-            ImGui::Text("LightSourse config:");
-            ImGui::ColorEdit3("light color", (float*)&cubeLight.color);
-            ImGui::SliderFloat("ambient", &cubeLight.a, 0.0000f, 1.0000f);
-            ImGui::SliderFloat("diffuse", &cubeLight.d, 0.0000f, 1.0000f);
-            ImGui::SliderFloat("specular", &cubeLight.s, 0.0000f, 1.0000f);
+            ImGui::Text("dirLight config:");
+            ImGui::ColorEdit3("dirLight color", (float*)&dirLight.color);
+            ImGui::Text("pointLight config:");
+            ImGui::ColorEdit3("pointLight color", (float*)&pointLight.color);
+            ImGui::SliderFloat("ambient", &pointLight.a, 0.0000f, 1.0000f);
+            ImGui::SliderFloat("diffuse", &pointLight.d, 0.0000f, 1.0000f);
+            ImGui::SliderFloat("specular", &pointLight.s, 0.0000f, 1.0000f);
 
 
             if (ImGui::Button("reset"))                                               
@@ -373,7 +349,9 @@ int main() {
         }
         ImGui::Render();
 
-        cubeLight.updateLight();
+        pointLight.updateLight();
+        dirLight.updateLight();
+        spotLight.updateLight(camera.Position, camera.Front);
 
         glClearColor(clear_color.r, clear_color.g, clear_color.b, clear_color.a);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -384,9 +362,9 @@ int main() {
 
         // movable light position
         vec3 lightPos(1.0f);
-        lightPos.x = cubeLight.position.x + cos(glfwGetTime() / 2) * 2.0f;
-        lightPos.y = cubeLight.position.y + sin(glfwGetTime() / 2) * 2.0f;
-        lightPos.z = cubeLight.position.z;
+        lightPos.x = pointLight.position.x + cos(glfwGetTime() / 2) * 2.0f;
+        lightPos.y = pointLight.position.y + sin(glfwGetTime() / 2) * 2.0f;
+        lightPos.z = pointLight.position.z;
 
         
         // mvp
@@ -409,14 +387,35 @@ int main() {
         cube_shader.setMat4("view", &view);
         cube_shader.setMat4("projection", &projection);
         cube_shader.setVec3("viewPos", &camera.Position);
-        cube_shader.setVec3("light.position", &lightPos);
-        cube_shader.setVec3("light.ambient", &cubeLight.ambient);
-        cube_shader.setVec3("light.diffuse", &cubeLight.diffuse);
-        cube_shader.setVec3("light.specular", &cubeLight.specular);
-        cube_shader.setVec3("material.ambient", &cubeMaterial.ambient);
-        cube_shader.setVec3("material.diffuse", &cubeMaterial.diffuse);
-        cube_shader.setVec3("material.specular", &cubeMaterial.specular);
-        cube_shader.setFloat("material.shininess", cubeMaterial.shininess);
+
+        cube_shader.setVec3("dirlight.direction",       &dirLight.direction);
+        cube_shader.setVec3("dirlight.ambient",         &dirLight.ambient);
+        cube_shader.setVec3("dirlight.diffuse",         &dirLight.diffuse);
+        cube_shader.setVec3("dirlight.specular",        &dirLight.specular);
+
+        cube_shader.setVec3("pointlight.position",      &lightPos);
+        cube_shader.setVec3("pointlight.ambient",       &pointLight.ambient);
+        cube_shader.setVec3("pointlight.diffuse",       &pointLight.diffuse);
+        cube_shader.setVec3("pointlight.specular",      &pointLight.specular);
+        cube_shader.setFloat("pointlight.constant",     pointLight.constant);
+        cube_shader.setFloat("pointlight.linear",       pointLight.linear);
+        cube_shader.setFloat("pointlight.quadratic",    pointLight.quadratic);
+
+        cube_shader.setVec3("spotlight.position",       &spotLight.position);
+        cube_shader.setVec3("spotlight.direction",      &spotLight.direction);
+        cube_shader.setVec3("spotlight.ambient",        &spotLight.ambient);
+        cube_shader.setVec3("spotlight.diffuse",        &spotLight.diffuse);
+        cube_shader.setVec3("spotlight.specular",       &spotLight.specular);
+        cube_shader.setFloat("spotlight.cutOff",        spotLight.cutOff);
+        cube_shader.setFloat("spotlight.outerCutOff",   spotLight.outerCutOff);
+        cube_shader.setFloat("spotlight.constant",      spotLight.constant);
+        cube_shader.setFloat("spotlight.linear",        spotLight.linear);
+        cube_shader.setFloat("spotlight.quadratic",     spotLight.quadratic);
+
+        cube_shader.setVec3("material.ambient",         &cubeMaterial.ambient);
+        cube_shader.setVec3("material.diffuse",         &cubeMaterial.diffuse);
+        cube_shader.setVec3("material.specular",        &cubeMaterial.specular);
+        cube_shader.setFloat("material.shininess",      cubeMaterial.shininess);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         /* draw box */
@@ -442,14 +441,35 @@ int main() {
             box_shader.setVec3("viewPos", &camera.Position);
             box_shader.setFloat("time", (float)(glfwGetTime()));
             box_shader.setFloat("mixvalue", mixvalue);
-            box_shader.setVec3("light.position", &lightPos);
-            box_shader.setVec3("light.ambient", &cubeLight.ambient);
-            box_shader.setVec3("light.diffuse", &cubeLight.diffuse);
-            box_shader.setVec3("light.specular", &cubeLight.specular);
-            box_shader.setVec3("material.ambient", &boxMaterial.ambient);
-            box_shader.setVec3("material.diffuse", &boxMaterial.diffuse);
-            box_shader.setVec3("material.specular", &boxMaterial.specular);
-            box_shader.setFloat("material.shininess", boxMaterial.shininess);
+
+            box_shader.setVec3("dirlight.direction",        &dirLight.direction);
+            box_shader.setVec3("dirlight.ambient",          &dirLight.ambient);
+            box_shader.setVec3("dirlight.diffuse",          &dirLight.diffuse);
+            box_shader.setVec3("dirlight.specular",         &dirLight.specular);
+
+            box_shader.setVec3("pointlight.position",       &lightPos);
+            box_shader.setVec3("pointlight.ambient",        &pointLight.ambient);
+            box_shader.setVec3("pointlight.diffuse",        &pointLight.diffuse);
+            box_shader.setVec3("pointlight.specular",       &pointLight.specular);
+            box_shader.setFloat("pointlight.constant",      pointLight.constant);
+            box_shader.setFloat("pointlight.linear",        pointLight.linear);
+            box_shader.setFloat("pointlight.quadratic",     pointLight.quadratic);
+
+            box_shader.setVec3("spotlight.position",       &spotLight.position);
+            box_shader.setVec3("spotlight.direction",      &spotLight.direction);
+            box_shader.setVec3("spotlight.ambient",        &spotLight.ambient);
+            box_shader.setVec3("spotlight.diffuse",        &spotLight.diffuse);
+            box_shader.setVec3("spotlight.specular",       &spotLight.specular);
+            box_shader.setFloat("spotlight.cutOff",        spotLight.cutOff);
+            box_shader.setFloat("spotlight.outerCutOff",   spotLight.outerCutOff);
+            box_shader.setFloat("spotlight.constant",      spotLight.constant);
+            box_shader.setFloat("spotlight.linear",        spotLight.linear);
+            box_shader.setFloat("spotlight.quadratic",     spotLight.quadratic);
+
+            box_shader.setVec3("material.ambient",          &boxMaterial.ambient);
+            box_shader.setVec3("material.diffuse",          &boxMaterial.diffuse);
+            box_shader.setVec3("material.specular",         &boxMaterial.specular);
+            box_shader.setFloat("material.shininess",       boxMaterial.shininess);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
@@ -464,7 +484,7 @@ int main() {
         light_shader.setMat4("model", &model);
         light_shader.setMat4("view", &view);
         light_shader.setMat4("projection", &projection);
-        light_shader.setVec3("lightColor", &cubeLight.color);
+        light_shader.setVec3("lightColor", &pointLight.color);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glBindVertexArray(0);
