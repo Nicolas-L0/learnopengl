@@ -1,6 +1,8 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
+#include "shader.hpp"
+
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -24,6 +26,7 @@ public:
 	vec3 direction;
 
 	DirLight(vec3 dir, vec3 col, float a, float d, float s);
+	void setDirLight(Shader shader);
 };
 
 class PointLight :public Light {
@@ -34,6 +37,7 @@ public:
 	float quadratic;
 
 	PointLight(vec3 pos, vec3 col, float a, float d, float s, float c, float l, float q);
+	void setPointLight(Shader shader, int i);
 };
 
 class SpotLight :public Light {
@@ -49,6 +53,7 @@ public:
 	float quadratic;
 
 	SpotLight(vec3 pos, vec3 dir, vec3 col, float cut, float ocut, float a, float d, float s, float c, float l, float q);
+	void setSpotLight(Shader shader);
 	void updateLight(vec3 pos, vec3 dir);
 };
 #endif

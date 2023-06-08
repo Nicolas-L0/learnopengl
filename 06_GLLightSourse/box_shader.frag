@@ -44,9 +44,10 @@ struct SpotLight{
 	float quadratic;
 };
 
+#define NR_POINT_LIGHTS 4
 uniform Material material;
 uniform DirLight dirlight;
-uniform PointLight pointlight;
+uniform PointLight pointlights[NR_POINT_LIGHTS];
 uniform SpotLight spotlight;
 uniform float mixvalue;
 uniform vec3 viewPos;
@@ -69,7 +70,7 @@ void main()
 	/* Lighting */
 	vec3 result = vec3(0.0f);
 	result += CalcDirLight(dirlight, norm, viewDir);
-	result += CalcPointLight(pointlight, norm, viewDir);
+	for(int i = 0; i < NR_POINT_LIGHTS; i++) result += CalcPointLight(pointlights[i], norm, viewDir);
 	result += CalcSpotLight(spotlight, norm, viewDir);
 
 	/* Frag Color*/

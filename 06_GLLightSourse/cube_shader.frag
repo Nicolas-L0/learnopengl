@@ -43,9 +43,10 @@ struct SpotLight{
 	float quadratic;
 };
 
+#define NR_POINT_LIGHTS 4
 uniform Material material;
 uniform DirLight dirlight;
-uniform PointLight pointlight;
+uniform PointLight pointlights[NR_POINT_LIGHTS];
 uniform SpotLight spotlight;
 uniform vec3 viewPos;
 
