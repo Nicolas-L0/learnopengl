@@ -191,16 +191,16 @@ int main() {
     }
 
     // light
+    float cutOff = 12.5, outercutOff = 17.5;
     DirLight dirLight(vec3(-0.2f, -1.0f, -0.3f), vec3(0.945f, 0.549f, 0.153f), 0.1f, 0.3f, 0.8f);
     const int pointLightSize = 4;
-    PointLight pointLight[4]{
-        {vec3(0.7f,  0.2f,  2.0f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f, 1.0f, 0.22f, 0.20f},
-        {vec3(2.3f, -3.3f, -4.0f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f, 1.0f, 0.22f, 0.20f},
-        {vec3(-4.0f,  2.0f, -12.0f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f, 1.0f, 0.22f, 0.20f},
-        {vec3(0.0f,  0.0f, -3.0f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f, 1.0f, 0.22f, 0.20f}
+    PointLight pointLights[pointLightSize]{
+    {vec3(0.7f,  0.2f,  2.0f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f, D20},
+    {vec3(2.3f, -3.3f, -4.0f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f, D20},
+    {vec3(-4.0f,  2.0f, -12.0f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f, D20},
+    {vec3(0.0f,  0.0f, -3.0f), vec3(1.0f, 1.0f, 1.0f), 0.2f, 0.5f, 1.0f, D20}
     };
-    float cutOff = 12.5, outercutOff = 17.5;
-    SpotLight spotLight(camera.Position, camera.Front, vec3(0.9f, 0.9f, 1.0f), cos(radians(cutOff)), cos(radians(outercutOff)), 0.2f, 0.5f, 1.0f, 1.0f, 0.045f, 0.0075f);
+    SpotLight spotLight(camera.Position, camera.Front, vec3(0.9f, 0.9f, 1.0f), 12.5, 17.5, 0.2f, 0.5f, 1.0f, D100);
 
     Material cubeMaterial = {
         vec3(0.135f, 0.2225f, 0.1575f),
@@ -314,33 +314,69 @@ int main() {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
         {
-            ImGui::Begin("config");                                                   
+            ImGui::Begin("config");       
 
             ImGui::Text("This is my first OpenGL project!");
-            ImGui::Text("Global setting:");
-            ImGui::Checkbox("enable_mouse_camera (key_M/N)", &enable_mouse_camera);   
-            ImGui::Checkbox("firstMouse", &firstMouse);
-            ImGui::Checkbox("camera.isFPScamera (Key_F)", &camera.isFPScamera);
-            ImGui::Checkbox("camera.constrainPitch (Key_P)", &camera.constrainPitch);
-            ImGui::ColorEdit4("clear color", (float*)&clear_color);         
-            ImGui::Text("Box config:");
-            ImGui::SliderFloat("boxTex_mixvalue", &mixvalue, 0.0f, 1.0f);             
-            ImGui::Text("CubeMaterial config:");                                      
-            ImGui::ColorEdit3("ambient", (float*)&cubeMaterial.ambient);
-            ImGui::ColorEdit3("diffuse", (float*)&cubeMaterial.diffuse);
-            ImGui::ColorEdit3("specular", (float*)&cubeMaterial.specular);
-            ImGui::SliderFloat("shininess", &cubeMaterial.shininess, 0.0001f, 256.0000f);
-            ImGui::Text("dirLight config:");
-            ImGui::ColorEdit3("dirLight color", (float*)&dirLight.color);
-            ImGui::Text("pointLight config:");
-            //ImGui::ColorEdit3("pointLight color", (float*)&pointLight.color);
-            //ImGui::SliderFloat("ambient", &pointLight.a, 0.0000f, 1.0000f);
-            //ImGui::SliderFloat("diffuse", &pointLight.d, 0.0000f, 1.0000f);
-            //ImGui::SliderFloat("specular", &pointLight.s, 0.0000f, 1.0000f);
-
-
+            if (ImGui::CollapsingHeader("Global setting")) {
+                ImGui::Checkbox("enable_mouse_camera (key_M/N)", &enable_mouse_camera);
+                ImGui::Checkbox("camera.isFPScamera (Key_F)", &camera.isFPScamera);
+                ImGui::Checkbox("camera.constrainPitch (Key_P)", &camera.constrainPitch);
+                ImGui::ColorEdit4("clear color", (float*)&clear_color);
+            }
+            if (ImGui::CollapsingHeader("Box config")) {
+                ImGui::SliderFloat("boxTex_mixvalue", &mixvalue, 0.0f, 1.0f);
+            }
+            if (ImGui::CollapsingHeader("CubeMaterial config")) {
+                ImGui::ColorEdit3("ambient", (float*)&cubeMaterial.ambient);
+                ImGui::ColorEdit3("diffuse", (float*)&cubeMaterial.diffuse);
+                ImGui::ColorEdit3("specular", (float*)&cubeMaterial.specular);
+                ImGui::SliderFloat("shininess", &cubeMaterial.shininess, 0.0001f, 256.0000f);
+            }
+            if (ImGui::CollapsingHeader("dirLight config")) {
+                ImGui::ColorEdit3("dirLight color", (float*)&dirLight.color);
+            }
+            if (ImGui::CollapsingHeader("pointLight config")) {
+                for (int i = 0; i < pointLightSize; i++)
+                {
+                    std::string index = "[" + std::to_string(i) + "]";
+                    std::string groupName = "pointlights" + index + " config";
+                    if (ImGui::TreeNode(groupName.c_str())) {
+                        // color
+                        ImGui::ColorEdit3(("pointlights" + index +".color").c_str(), (float*)&pointLights[i].color);
+                        // ambient diffuse specular
+                        vec3 ads = vec3(pointLights[i].a, pointLights[i].d, pointLights[i].s);
+                        ImGui::SliderFloat3(("pointlights" + index + ".a d s").c_str(), (float*)&ads, 0.0f, 1.0f);
+                        pointLights[i].a = ads.x;
+                        pointLights[i].d = ads.y;
+                        pointLights[i].s = ads.z;
+                        // distance Attenuation
+                        int dis = pointLights[i].DISTANCE;
+                        const char* dis_name = (dis >= 0 && dis < Distance_ENUM_LAST) ? lightAttenuation_distance_name[dis] : "Unknown";
+                        ImGui::SliderInt(("pointlights" + index + ".Distance").c_str(), &dis, 0, Distance_ENUM_LAST - 1, dis_name);
+                        pointLights[i].DISTANCE = (Distance_ENUM)dis;
+                        ImGui::TreePop();
+                    }
+                }
+            }
+            if (ImGui::CollapsingHeader("spotLight config")) {
+                // cutoff angle
+                vec2 cutoff_angle = vec2(spotLight.AcutOff, spotLight.AouterCutOff);
+                ImGui::DragFloat2("spotLight cutoff angle", (float*)&cutoff_angle,0.1f, 0.0f, 90.0f);
+                spotLight.AcutOff = cutoff_angle.x;
+                spotLight.AouterCutOff = cutoff_angle.y;
+                // ambient diffuse specular
+                vec3 ads = vec3(spotLight.a, spotLight.d, spotLight.s);
+                ImGui::SliderFloat3("spotLight.a/d/s", (float*)&ads, 0.0f, 1.0f);
+                spotLight.a = ads.x;
+                spotLight.d = ads.y;
+                spotLight.s = ads.z;
+                // distance Attenuation
+                int dis = spotLight.DISTANCE;
+                const char* dis_name = (dis >= 0 && dis < Distance_ENUM_LAST) ? lightAttenuation_distance_name[dis] : "Unknown";
+                ImGui::SliderInt("spotLight.Distance", &dis, 0, Distance_ENUM_LAST - 1, dis_name);
+                spotLight.DISTANCE = (Distance_ENUM)dis;
+            }
             if (ImGui::Button("reset"))                                               
             {
                 enable_mouse_camera = false;
@@ -354,7 +390,7 @@ int main() {
             ImGui::End();
         }
         ImGui::Render();
-        for (unsigned i = 0; i < pointLightSize; i++) pointLight[i].updateLight();
+        for (unsigned i = 0; i < pointLightSize; i++) pointLights[i].updateLight();
         dirLight.updateLight();
         spotLight.updateLight(camera.Position, camera.Front);
 
@@ -393,7 +429,7 @@ int main() {
         cube_shader.setVec3("viewPos", &camera.Position);
 
         dirLight.setDirLight(cube_shader);
-        for (int i = 0; i < pointLightSize; i++) pointLight[i].setPointLight(cube_shader, i);
+        for (int i = 0; i < pointLightSize; i++) pointLights[i].setPointLight(cube_shader, i);
         spotLight.setSpotLight(cube_shader);
 
         cube_shader.setVec3("material.ambient",         &cubeMaterial.ambient);
@@ -427,7 +463,7 @@ int main() {
             box_shader.setFloat("mixvalue", mixvalue);
 
             dirLight.setDirLight(box_shader);
-            for (int i = 0; i < pointLightSize; i++) pointLight[i].setPointLight(box_shader, i);
+            for (int i = 0; i < pointLightSize; i++) pointLights[i].setPointLight(box_shader, i);
             spotLight.setSpotLight(box_shader);
 
             box_shader.setVec3("material.ambient",          &boxMaterial.ambient);
@@ -437,7 +473,6 @@ int main() {
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
-
         /* draw light cube */
         glBindVertexArray(lightVAO);
         light_shader.use();
@@ -446,13 +481,13 @@ int main() {
         {
             model = mat4(1.0f);
             float angle = 10.0f * i + 10.0f;
-            model = translate(model, pointLight[i].position);
+            model = translate(model, pointLights[i].position);
             model = rotate(model, (float)(glfwGetTime() * radians(angle)), vec3(0.0f, 0.0f, 1.0f));
             model = scale(model, vec3(0.2f));
             light_shader.setMat4("model", &model);
             light_shader.setMat4("view", &view);
             light_shader.setMat4("projection", &projection);
-            light_shader.setVec3("lightColor", &pointLight[i].color);
+            light_shader.setVec3("lightColor", &pointLights[i].color);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 

@@ -25,17 +25,14 @@ void DirLight::setDirLight(Shader shader) {
 }
 
 
-PointLight::PointLight(vec3 pos, vec3 col, float a, float d, float s, float c, float l, float q) {
+PointLight::PointLight(vec3 pos, vec3 col, float a, float d, float s, Distance_ENUM dis) {
 	color = col;
 	this->a = a;
 	this->d = d;
 	this->s = s;
 
-	constant = c;
-	linear = l;
-	quadratic = q;
-
 	position = pos;
+	DISTANCE = dis;
 
 	updateLight();
 }
@@ -50,23 +47,30 @@ void PointLight::setPointLight(Shader shader, int i) {
 	shader.setFloat("pointlights" + index + ".linear",		linear);
 	shader.setFloat("pointlights" + index + ".quadratic",	quadratic);
 }
+void PointLight::updateLight() {
+	ambient = a * color;
+	diffuse = d * color;
+	specular = s * color;
+
+	constant = lightAttenuation[DISTANCE].x;
+	linear = lightAttenuation[DISTANCE].y;
+	quadratic = lightAttenuation[DISTANCE].z;
+}
 
 
-SpotLight::SpotLight(vec3 pos, vec3 dir, vec3 col, float cut, float ocut, float a, float d, float s, float c, float l, float q) {
+
+SpotLight::SpotLight(vec3 pos, vec3 dir, vec3 col, float cut, float ocut, float a, float d, float s, Distance_ENUM dis) {
 	color = col;
 	this->a = a;
 	this->d = d;
 	this->s = s;
 
-	constant = c;
-	linear = l;
-	quadratic = q;
-
 	position = pos;
 	direction = normalize(dir);
+	DISTANCE = dis;
 
-	cutOff = cut;
-	outerCutOff = ocut;
+	AcutOff = cut;
+	AouterCutOff = ocut;
 
 	updateLight(position, direction);
 }
@@ -82,7 +86,6 @@ void SpotLight::setSpotLight(Shader shader) {
 	shader.setFloat("spotlight.linear",		linear);
 	shader.setFloat("spotlight.quadratic",	quadratic);
 }
-
 void SpotLight::updateLight(vec3 pos, vec3 dir) {
 	ambient = a * color;
 	diffuse = d * color;
@@ -90,4 +93,11 @@ void SpotLight::updateLight(vec3 pos, vec3 dir) {
 
 	position = pos;
 	direction = dir;
+
+	cutOff = cos(radians(AcutOff));
+	outerCutOff = cos(radians(AouterCutOff));
+
+	constant = lightAttenuation[DISTANCE].x;
+	linear = lightAttenuation[DISTANCE].y;
+	quadratic = lightAttenuation[DISTANCE].z;
 }

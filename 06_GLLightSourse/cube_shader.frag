@@ -64,7 +64,7 @@ void main()
 	/* Lighting */
 	vec3 result = vec3(0.0f);
 	result += CalcDirLight(dirlight, norm, viewDir);
-	result += CalcPointLight(pointlight, norm, viewDir);
+	for(int i = 0; i < NR_POINT_LIGHTS; i++) result += CalcPointLight(pointlights[i], norm, viewDir);
 	result += CalcSpotLight(spotlight, norm, viewDir);
 	/* Frag Color*/
 	FragColor = vec4(result, 1.0f);
